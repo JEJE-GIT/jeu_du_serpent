@@ -49,9 +49,90 @@ document.addEventListener("DOMContentLoaded", function(event) {               //
 
     class Serpent{
 
-        constructor() {         //la fonction "constructor" sert a initier des variables pour la classe "Serpent"
+        constructor(_leJeu) {         //la fonction "constructor" sert a initier des variables pour la classe "Serpent"   *"_leJeu" fait référence à la classe "Jeu"*
 
             console.log("Création du Serpent");
+
+            this.leJeu = _leJeu;     //le paramètre "_leJeu" va être gardé en mémoire
+
+            this.currentX = -1;     //La position de départ en X est de -1;
+            this.currentY = 0;      //La position de départ en Y est de 0;
+
+            this.nextMoveX = 1;     //Le prochain mouvement en x est 1
+            this.nextMoveY = 0;     //Le prochain mouvement en y est 0
+
+            this.serpentLongueur = 1;       //la longeur de base du serpent est de 1
+            this.tblCarreSerpent = [];      //cela sert à garder en référance le nombre de carré du serpent, c'est-à dire sa longueur
+
+            this.vitesse = 250;            //Le serpent avance d'un carré à chaque 250ms, pour sa vitesse.
+            this.timing = setInterval(this.controleSerpent.bind(this), this.vitesse);       //la fonctionnalité  "controleSerpent" est appelée à chaque 250ms, c'est-à dire la valeur de "vitesse". Le "this" dans "controleSerpent.bind(this)" possède le contexte de "this" de la classe "Serpent" et non du "setInterval"
+
+            document.addEventListener("keydown", this.verifTouche.bind(this));     //dès qu'une touche est appuié, appele la donctionnalité "verifTouche" qui est dans la classe Serpent. Le "this" dans "verifTouche.bind(this)" possède le contexte de "this" de la classe "Serpent" et non du "document.addEventListener"
+
+
+        }
+
+        verifTouche(_evt) {        //fonctionalité qui sert a vérifier si une touche a été appuyé
+
+            var evt = _evt;         //la variable "evt" représente un évènement
+
+            console.log(evt.keyCode);
+
+            this.deplacement(evt.keyCode);      //Dans "this", la fonctionnalité "deplacement" qui se trouve dans la classe "Serpent" est appelé et il prend comme paramètre "(evt.keyCode)"
+
+        }
+
+        deplacement(dirCode) {    //fonctionalité qui sert a déplacer le serpent
+
+            switch (dirCode) {
+
+                case 37:            //touche de gauche
+                    this.nextMoveX = -1;
+                    this.nextMoveY = 0;
+                    break;
+
+                case 38:            //touche de haut
+                    this.nextMoveX = 0;
+                    this.nextMoveY = -1;
+                    break;
+
+                case 39:            //touche de droite
+                    this.nextMoveX = 1;
+                    this.nextMoveY = 0;
+                    break;
+
+                case 40:            //touche de bas
+                    this.nextMoveX = 0;
+                    this.nextMoveY = 1;
+                    break;
+
+            }
+
+            console.log(this.nextMoveX,  this.nextMoveY);
+
+        }
+
+        controleSerpent() {     //fonctionalité qui sert a vérifier un évenement du serpent, ex: Si le serpent se touche lui-même, etc.
+
+            var nextX = this.currentX + this.nextMoveX;     //la variable "nextX" est égale à la position de départ en x + le prochain mouvement en x
+            var nextY = this.currentY + this.nextMoveY;     //la variable "nextY" est égale à la position de départ en Y + le prochain mouvement en Y
+
+            this.dessineCaré(nextX, nextY);         //Le carré à été dessiné après cette prochaine position
+            this.currentX = nextX;
+            this.currentY = nextY;
+
+
+        }
+
+        dessineCaré(x, y) {        //fonctionalité qui sert a dessiner le serpent en svg
+
+
+
+        }
+
+        supprimeSerpent() {        //fonctionalité qui sert a supprimer le serpent
+
+
 
         }
 
