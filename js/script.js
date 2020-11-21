@@ -1,5 +1,5 @@
 
-document.addEventListener("DOMContentLoaded", function(event) {               //Temps de la vidéo tuto: 1h02min
+document.addEventListener("DOMContentLoaded", function(event) {               //Temps de la vidéo tuto: 1h39min et 12sec
 
     //Le jeu
 
@@ -30,7 +30,14 @@ document.addEventListener("DOMContentLoaded", function(event) {               //
             if(this.pomme !== undefined) {         //Si "this.pomme" est différent de "non-défini". C'est-à dire que si la pomme à été crée...
 
                 this.pomme.supprimePomme();     //Dans "this.pomme", la fonctionnalité "supprimePomme()" sera appelé depuis la classe "Pomme"
-                this.pomme = undefined;     //S'assurer que "this.pomme" ne soit plus gardé en mémoire
+                this.pomme = undefined;     //S'assure que "this.pomme" ne soit plus gardé en mémoire
+
+            }
+
+            if(this.serpent !== undefined) {        //Si "this.serpent" est différent de "non-défini". C'est-à dire que si le serpent à été crée...
+
+                this.serpent.supprimeSerpent();     //appele la fonction "supprimeSerpent()" qui est dans la classe "Serpent"
+                this.serpent = undefined;        //S'assure que "this.serpent" ne soit plus gardé en mémoire
 
             }
 
@@ -55,14 +62,16 @@ document.addEventListener("DOMContentLoaded", function(event) {               //
 
             this.leJeu = _leJeu;     //le paramètre "_leJeu" va être gardé en mémoire
 
-            this.currentX = -1;     //La position de départ en X est de -1;
-            this.currentY = 0;      //La position de départ en Y est de 0;
+            this.currentX = -1;     //La position courrante en X est de -1;
+            this.currentY = 0;      //La position courrante en Y est de 0;
 
             this.nextMoveX = 1;     //Le prochain mouvement en x est 1
             this.nextMoveY = 0;     //Le prochain mouvement en y est 0
 
             this.serpentLongueur = 1;       //la longeur de base du serpent est de 1
             this.tblCarreSerpent = [];      //cela sert à garder en référance le nombre de carré du serpent, c'est-à dire sa longueur
+
+            this.touche = false;            //au début de la partie, le serpent touche a personne
 
             this.vitesse = 250;            //Le serpent avance d'un carré à chaque 250ms, pour sa vitesse.
             this.timing = setInterval(this.controleSerpent.bind(this), this.vitesse);       //la fonctionnalité  "controleSerpent" est appelée à chaque 250ms, c'est-à dire la valeur de "vitesse". Le "this" dans "controleSerpent.bind(this)" possède le contexte de "this" de la classe "Serpent" et non du "setInterval"
@@ -117,22 +126,73 @@ document.addEventListener("DOMContentLoaded", function(event) {               //
             var nextX = this.currentX + this.nextMoveX;     //la variable "nextX" est égale à la position de départ en x + le prochain mouvement en x
             var nextY = this.currentY + this.nextMoveY;     //la variable "nextY" est égale à la position de départ en Y + le prochain mouvement en Y
 
+            this.tblCarreSerpent.forEach(function (element) {       //Cela va vérivier si les variables "nextX" et "nextY" ne sont pas en conflit avec les elements du tableau "tblCarreSerpent". Une nouvelle fonction viens d'être crée, donc il n'apartien plus à la classe serpent
+
+                if(nextX === element[1] && nextY === element[2]) {      //si la variable "nextX" est égal à l'element 1 (le "x") du tableau "tblCarreSerpent"...  ET   si la variable "nextY" est égal à l'element 2 (le "y") du tableau "tblCarreSerpent"...
+
+                    console.log("touche moi-même!");
+                    this.leJeu.finPartie();     //apelle la fonctionalité "finPartie()" qui se situe dans la classe "Serpent"
+                    this.touche = true;         //Le serpent touche au limites
+
+                }
+
+            }.bind(this));      //le "this" est lié au contexte du "this" de la classe serpent
+
+            if(nextY < 0 || nextX < 0 || nextY > this.leJeu.grandeurGrille - 1 || nextX > this.leJeu.grandeurGrille - 1) {       //Si le serpent dépasse la grille
+
+                console.log("touche limite");
+                this.leJeu.finPartie();     //apelle la fonctionnalité "finPartie()" dans la classe serpent
+                this.touche = true;         //le serpent touche aux limites
+
+            }
+
+            if(!this.touche) {      //Si le serpent ne touche pas au limities...
+
+            if(this.currentX === this.leJeu.pomme.pomme[1] && this.currentY === this.leJeu.pomme.pomme[2]) {      //si la variable "currentX" est égal à l'element 1 (le "x") du tableau "pomme"...  ET   si la variable "currentY" est égal à l'element 2 (le "y") du tableau "pomme"...
+
+                this.serpentLongueur++;     //augmenter la valeur de 1 de "serpentLongueur"
+
+                this.leJeu.affichagePointage(this.serpentLongueur);     //affiche le pointage selon la longueur
+
+                this.leJeu.pomme.supprimePomme();        //appelle la fonctionalité "supprimePomme()" dans la classe "Pomme"
+                this.leJeu.pomme.ajoutePomme();           //appelle la fonctionalité "ajoutePomme()" dans la classe "Pomme"
+
+            }
+
             this.dessineCaré(nextX, nextY);         //Le carré à été dessiné après cette prochaine position
-            this.currentX = nextX;
-            this.currentY = nextY;
+            this.currentX = nextX;          //La position courrante en x se fera remplacer de position part la variable "nextX"
+            this.currentY = nextY;          //La position courrante en y se fera remplacer de position part la variable "nextY"
 
+            }
 
-        }
+    }
 
         dessineCaré(x, y) {        //fonctionalité qui sert a dessiner le serpent en svg
 
+            var unCarre = [this.leJeu.s.rect(x * this.leJeu.grandeurCarre, y * this.leJeu.grandeurCarre, this.leJeu.grandeurCarre, this.leJeu.grandeurCarre), x, y];      //Dans le tableau "unCarre", ceci va dessiner le serpent en svg, c'est-à dire selon la position x, la position y, la longueur et la hauteur. Il va aussi "attribuer" la couleur noire. le dernier "x" et le dernier "y" vont servir à détecter si il y a une colision avec le serpent lui-même.
 
+            this.tblCarreSerpent.push(unCarre);     //cela va faire en sorte d'ajouter un carré à la fin d'un tableau dans le tableau, c'est à dire d'augmenter sa longueur
+
+            if(this.tblCarreSerpent.length > this.serpentLongueur) {
+
+                this.tblCarreSerpent[0][0].remove();     //le premier "[0]" représente le tableau "tblCarreSerpent" et le deuxieme "[0]" représente le tableau this.leJeu.s.rect dans la variable "unCarre". Les 2 "[0]" vont être suprimé des tableaux
+                this.tblCarreSerpent.shift();            //Un carré sera enlevé au début du tableau "tblCarreSerpent"
+
+            }
 
         }
 
         supprimeSerpent() {        //fonctionalité qui sert a supprimer le serpent
 
+            clearInterval(this.timing);     //Stop le timing du serpent, c'est-à dire qu'il ne bouge plus
 
+            while(this.tblCarreSerpent.length > 0) {         //tant que la longueur du tableau "tblCarreSerpent" est plus gros que 0
+
+                this.tblCarreSerpent[0][0].remove();         //le premier "[0]" représente le tableau "tblCarreSerpent" et le deuxieme "[0]" représente le tableau "this.leJeu.s.rect" dans la variable "unCarre". Les 2 "[0]" vont être suprimé des tableaux
+
+                this.tblCarreSerpent.shift();              //enlève un element au début du tableau "tblCarreSerpent"
+
+            }
 
         }
 
